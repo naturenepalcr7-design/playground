@@ -35,12 +35,13 @@ venv/
 env/
 ENV/
 
-# ---- Node.js / NPM ----
+# ---- Node.js / NPM / Bun ----
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+bun-debug.log*
 
 # ---- Next.js ----
 frontend/.next/

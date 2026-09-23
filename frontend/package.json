@@ -2,6 +2,7 @@
   "name": "kmc-gis-frontend",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "bun@1.2.4",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
