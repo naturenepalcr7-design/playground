@@ -1,0 +1,22 @@
+# ============================================================
+# Backend .dockerignore
+# ============================================================
+.git
+.gitignore
+.env*
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.ruff_cache
+.coverage
+htmlcov
+uploads
+*.mbtiles
+*.shp
+*.gpkg
+*.geotiff
+*.tif
+*.tiff
+*.geojson

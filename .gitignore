@@ -1,0 +1,100 @@
+# ==============================================================================
+# KMC-GIS-SERVER — .gitignore
+# ==============================================================================
+# Organized by category. Keep alphabetically within each section.
+# ==============================================================================
+
+# ---- Environment & Secrets ----
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.cover
+.tox/
+.nox/
+venv/
+.venv/
+env/
+ENV/
+
+# ---- Node.js / NPM ----
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- Next.js ----
+frontend/.next/
+frontend/out/
+frontend/.vercel
+
+# ---- Docker ----
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# ---- GIS / Spatial Data (large binary files) ----
+*.mbtiles
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.sbn
+*.sbx
+*.gpkg
+*.geotiff
+*.tif
+*.tiff
+*.geojson
+!tileserver/config.json
+
+# ---- Uploads & Generated Data ----
+uploads/
+/tileserver-data/
+
+# ---- Scratch / Test Scripts ----
+scratch/
+
+# ---- IDE & Editor ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# ---- OS Metadata ----
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- Misc ----
+*.bak
+*.tmp
+*.temp
+.cache/

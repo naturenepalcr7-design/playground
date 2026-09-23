@@ -1,0 +1,17 @@
+# ============================================================
+# Root .dockerignore
+# Prevent secrets, git history, and build artifacts from leaking
+# ============================================================
+**/.git
+**/.gitignore
+**/.env*
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.ruff_cache
+**/*.log
+**/uploads
+**/tileserver-data
+**/scratch

@@ -1,0 +1,11 @@
+{
+  "options": {
+    "paths": {
+      "root": "",
+      "mbtiles": "/data"
+    },
+    "serveAllStyles": false,
+    "publicUrl": "/tiles"
+  },
+  "data": {}
+}
