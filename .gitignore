@@ -11,6 +11,8 @@
 *.pem
 *.key
 *.crt
+!nginx/ssl/*.pem
+!nginx/ssl/*.key
 
 # ---- Python ----
 __pycache__/
