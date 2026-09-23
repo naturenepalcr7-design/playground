@@ -57,7 +57,10 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "/app/uploads"
 
     # ---- CORS ----
-    CORS_ORIGINS: str = "http://localhost:8090,http://127.0.0.1:8090,http://localhost,http://localhost:80"
+    CORS_ORIGINS: str = (
+        "http://103.69.126.226,http://103.69.126.226:80,http://localhost,http://localhost:80,"
+        "http://localhost:8090,http://127.0.0.1:8090"
+    )
 
     @property
     def cors_origin_list(self) -> List[str]:
@@ -66,7 +69,7 @@ class Settings(BaseSettings):
     # ---- Application ----
     APP_NAME: str = "KMC-GIS-SERVER"
     DEBUG: bool = False
-    PUBLIC_SERVER_URL: Optional[str] = None
+    PUBLIC_SERVER_URL: Optional[str] = "http://103.69.126.226"
 
     # ---- Geofence ----
     GEOFENCE_RADIUS_METERS: float = 50.0

@@ -2029,7 +2029,9 @@ export default function AdminPanel({
         {/* ======================================================== */}
         {/* ============ 5. GIS SERVICE LINKS TAB ================== */}
         {/* ======================================================== */}
-        {activeTab === 'services' && (
+        {activeTab === 'services' && (() => {
+          const serverOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://103.69.126.226';
+          return (
           <div className="space-y-4 animate-fade-in">
             {/* Connection Info */}
             <div className="bg-gov-blue-50 border border-gov-blue-200 rounded-lg p-3 text-xs space-y-2">
@@ -2042,12 +2044,12 @@ export default function AdminPanel({
                 <p>QGIS → Layer → Add Layer → WFS / OGC API Features →</p>
                 <div className="flex items-center gap-1">
                   <code className="bg-white px-2 py-0.5 rounded border text-[10px] font-mono flex-1 truncate select-all font-semibold text-slate-800">
-                    http://&lt;server&gt;/ogc/
+                    {serverOrigin}/ogc/
                   </code>
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText('http://<server>/ogc/');
+                      navigator.clipboard.writeText(`${serverOrigin}/ogc/`);
                       setMessage({ type: 'success', text: 'OGC URL कपि भयो!' });
                       setTimeout(() => setMessage(null), 2000);
                     }}
@@ -2060,12 +2062,12 @@ export default function AdminPanel({
                 <p className="text-[10px] text-slate-500">Open (no auth) — anyone with the URL can view and edit</p>
                 <div className="flex items-center gap-1 mt-1">
                   <code className="bg-white px-2 py-0.5 rounded border text-[10px] font-mono flex-1 truncate select-all font-semibold text-slate-800">
-                    http://&lt;server&gt;/ogc-secure/
+                    {serverOrigin}/ogc-secure/
                   </code>
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText('http://<server>/ogc-secure/');
+                      navigator.clipboard.writeText(`${serverOrigin}/ogc-secure/`);
                       setMessage({ type: 'success', text: 'Secure OGC URL कपि भयो!' });
                       setTimeout(() => setMessage(null), 2000);
                     }}
@@ -2092,7 +2094,7 @@ export default function AdminPanel({
                   </div>
                 )}
                 {allLayers.map((layer) => {
-                  const ogcItemsUrl = `http://<server>/ogc/collections/${layer.id}/items`;
+                  const ogcItemsUrl = `${serverOrigin}/ogc/collections/${layer.id}/items`;
                   return (
                     <div key={layer.id} className="bg-white border border-slate-200 rounded-lg p-2.5 hover:border-gov-blue-300 transition-colors">
                       <div className="flex items-center justify-between mb-1">
@@ -2140,8 +2142,8 @@ export default function AdminPanel({
                   </div>
                 )}
                 {allTiles.map((tile) => {
-                  const xyzUrl = `http://<server>/api/tiles/${tile.id}/{z}/{x}/{y}.png`;
-                  const tileJsonUrl = `http://<server>/api/tiles/${tile.id}/tilejson.json`;
+                  const xyzUrl = `${serverOrigin}/api/tiles/${tile.id}/{z}/{x}/{y}.png`;
+                  const tileJsonUrl = `${serverOrigin}/api/tiles/${tile.id}/tilejson.json`;
                   return (
                     <div key={tile.id} className="bg-white border border-slate-200 rounded-lg p-2.5 hover:border-amber-300 transition-colors">
                       <div className="flex items-center justify-between mb-1">
@@ -2197,7 +2199,8 @@ export default function AdminPanel({
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* ======================================================== */}
