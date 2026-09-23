@@ -38,6 +38,14 @@ export default function GpsGuardModal({
   };
 
   const isPermissionDenied = gpsError?.code === 1 || (gpsError?.message || '').toLowerCase().includes('denied');
+  const isHttp = typeof window !== 'undefined' && window.location.protocol === 'http:';
+  const isInsecureOrigin = isHttp || (gpsError?.message || '').toLowerCase().includes('secure origin') || (gpsError?.message || '').toLowerCase().includes('https');
+
+  const handleSwitchToHttps = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = window.location.href.replace('http:', 'https:');
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-99999 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 select-none animate-fade-in font-sans">
@@ -102,6 +110,27 @@ export default function GpsGuardModal({
                 यन्त्रको GPS संकेत पर्खिंदैछ... कृपया ब्राउजरमा पप-अप आएमा "Allow" मा क्लिक गर्नुहोस्।
               </div>
             )}
+
+            {/* Insecure Origin Notice & Direct HTTPS Switch Button */}
+            {isInsecureOrigin && (
+              <div className="mt-2 bg-amber-50 border border-amber-300 rounded-lg p-2.5 text-amber-900 text-[11px] space-y-1.5">
+                <div className="font-bold flex items-center gap-1 font-nepali">
+                  <Lock className="w-3.5 h-3.5 text-amber-700" />
+                  <span>सुरक्षित HTTPS जडान आवश्यक (HTTPS Required)</span>
+                </div>
+                <p className="font-nepali leading-relaxed text-[10.5px]">
+                  ब्राउजर सुरक्षा नियमअनुसार GPS स्थान केवल सुरक्षित (HTTPS) ठेगानामा मात्र सक्रिय हुन्छ।
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSwitchToHttps}
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-1.5 px-3 rounded text-[11px] flex items-center justify-center gap-1.5 transition-colors font-nepali shadow-xs"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>सुरक्षित HTTPS मा जानुहोस् (Switch to Secure HTTPS)</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Step-by-Step Instructions */}
@@ -118,8 +147,9 @@ export default function GpsGuardModal({
                   <span>Chrome / Edge ब्राउजर:</span>
                 </div>
                 <ol className="list-decimal list-inside space-y-0.5 leading-tight font-nepali">
-                  <li>URL ठेगानाको बायाँपट्टि रहेको <strong>प्याडलक (ताल्चा 🔒)</strong> आइकन थिच्नुहोस्।</li>
+                  <li>URL ठेगानाको बायाँपट्टि रहेको <strong>प्याडलक (ताल्चा 🔒)</strong> वा ट्युन आइकन थिच्नुहोस्।</li>
                   <li><strong>Location (स्थान)</strong> लाई <strong>Allow (स्वीकार)</strong> गर्नुहोस्।</li>
+                  <li>SSL चेतावनी आएमा <em>Advanced &rarr; Proceed</em> थिच्नुहोस्।</li>
                 </ol>
               </div>
 

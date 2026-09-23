@@ -42,6 +42,16 @@ export default function useGeolocation(options = {}) {
   }, []);
 
   const startTracking = useCallback(() => {
+    // Check if running in browser and origin is insecure
+    if (typeof window !== 'undefined' && window.isSecureContext === false) {
+      setError({
+        code: 1,
+        message: 'GPS Geolocation requires a secure HTTPS connection. Please access the application via https://',
+      });
+      setIsTracking(false);
+      return;
+    }
+
     if (!navigator.geolocation) {
       setError({ code: 0, message: 'Geolocation not supported' });
       return;

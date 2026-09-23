@@ -88,10 +88,10 @@ services:
       - ADMIN_FULL_NAME=${ADMIN_FULL_NAME:-KMC GIS Administrator}
       - TILESERVER_INTERNAL_URL=${TILESERVER_INTERNAL_URL:-http://tileserver:8080}
       - MAX_UPLOAD_SIZE_MB=${MAX_UPLOAD_SIZE_MB:-8192}
-      - CORS_ORIGINS=${CORS_ORIGINS:-http://103.69.126.226,http://103.69.126.226:80,http://localhost,http://localhost:80,http://localhost:8090,http://127.0.0.1:8090}
+      - CORS_ORIGINS=${CORS_ORIGINS:-https://103.69.126.226,https://103.69.126.226:443,http://103.69.126.226,http://103.69.126.226:80,https://localhost,http://localhost,http://localhost:80,http://localhost:8090,http://127.0.0.1:8090}
       - APP_NAME=${APP_NAME:-KMC-GIS-SERVER}
       - DEBUG=${DEBUG:-false}
-      - PUBLIC_SERVER_URL=${PUBLIC_SERVER_URL:-http://103.69.126.226}
+      - PUBLIC_SERVER_URL=${PUBLIC_SERVER_URL:-https://103.69.126.226}
       - TMPDIR=/tileserver-data/temp
     volumes:
       - tileserver_data:/tileserver-data
@@ -145,8 +145,10 @@ services:
     restart: unless-stopped
     ports:
       - "${HOST_PORT:-80}:80"
+      - "${HOST_SSL_PORT:-443}:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     depends_on:
       frontend:
         condition: service_healthy

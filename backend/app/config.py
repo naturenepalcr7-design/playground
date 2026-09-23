@@ -58,7 +58,8 @@ class Settings(BaseSettings):
 
     # ---- CORS ----
     CORS_ORIGINS: str = (
-        "http://103.69.126.226,http://103.69.126.226:80,http://localhost,http://localhost:80,"
+        "https://103.69.126.226,https://103.69.126.226:443,http://103.69.126.226,http://103.69.126.226:80,"
+        "https://localhost,http://localhost,http://localhost:80,"
         "http://localhost:8090,http://127.0.0.1:8090"
     )
 
@@ -69,7 +70,7 @@ class Settings(BaseSettings):
     # ---- Application ----
     APP_NAME: str = "KMC-GIS-SERVER"
     DEBUG: bool = False
-    PUBLIC_SERVER_URL: Optional[str] = "http://103.69.126.226"
+    PUBLIC_SERVER_URL: Optional[str] = "https://103.69.126.226"
 
     # ---- Geofence ----
     GEOFENCE_RADIUS_METERS: float = 50.0

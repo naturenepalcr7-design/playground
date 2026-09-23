@@ -2030,7 +2030,7 @@ export default function AdminPanel({
         {/* ============ 5. GIS SERVICE LINKS TAB ================== */}
         {/* ======================================================== */}
         {activeTab === 'services' && (() => {
-          const serverOrigin = typeof window !== 'undefined' ? window.location.origin : 'http://103.69.126.226';
+          const serverOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://103.69.126.226';
           return (
           <div className="space-y-4 animate-fade-in">
             {/* Connection Info */}
