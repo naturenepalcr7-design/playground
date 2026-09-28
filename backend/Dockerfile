@@ -38,7 +38,9 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 
 COPY . .
 
-RUN mkdir -p /app/uploads /tileserver-data
+RUN mkdir -p /app/uploads /tileserver-data && chown -R appuser:appuser /app /tileserver-data
+
+USER appuser
 
 EXPOSE 8000
 
