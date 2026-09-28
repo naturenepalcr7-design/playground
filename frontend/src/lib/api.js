@@ -307,3 +307,42 @@ export const trackingAPI = {
 };
 
 
+
+
+// ---- Unified House Numbering API (same PostGIS as Field Collection) ----
+export const houseNumberingAPI = {
+  health: () => api.get('/v1/house-numbering/health'),
+  catalog: () => api.get('/v1/house-numbering/catalog'),
+  wards: () => api.get('/v1/wards'),
+  roads: (params = {}) => api.get('/v1/roads', { params }),
+  buildings: (params = {}) => api.get('/v1/buildings', { params }),
+  gates: (params = {}) => api.get('/v1/gates', { params }),
+  summary: (params = {}) => api.get('/v1/dashboard/summary', { params }),
+  search: (q, limit = 50) => api.get('/v1/search', { params: { q: q, limit: limit } }),
+  policies: () => api.get('/v1/numbering/policies'),
+  assignmentPreview: (data) => api.post('/v1/assignments/preview', data),
+  assignmentCommit: (data) => api.post('/v1/assignments/commit', data),
+  assignment: (buildingId) => api.get('/v1/assignments/' + buildingId),
+  numberingPreview: (data) => api.post('/v1/numbering/preview', data),
+  numberingCommit: (runId) => api.post('/v1/numbering/commit', { run_id: runId }),
+  runs: (limit = 50) => api.get('/v1/numbering/runs', { params: { limit: limit } }),
+  detail: (houseNumberId) => api.get('/v1/numbering/' + houseNumberId),
+  updateBuilding: (id, data) => api.patch('/v1/buildings/' + id, data),
+  updateRoad: (id, data) => api.patch('/v1/roads/' + id, data),
+  updateGate: (id, data) => api.patch('/v1/gates/' + id, data),
+  importDryRun: (formData) => api.post('/v1/imports/dry-run', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 0,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+  }),
+  importCommit: (formData) => api.post('/v1/imports', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 0,
+    maxContentLength: Infinity,
+    maxBodyLength: Infinity,
+  }),
+  importStatus: (jobId) => api.get('/v1/imports/' + jobId),
+  audit: (params = {}) => api.get('/v1/audit', { params }),
+  jobStatus: (jobId) => api.get('/v1/jobs/' + jobId),
+};
