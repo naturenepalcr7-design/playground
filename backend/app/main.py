@@ -30,6 +30,7 @@ from app.routers import (
     media,
     tracking,
     ogcapi,
+    house_numbering,
 )
 
 settings = get_settings()
@@ -55,8 +56,10 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
     await init_database()
+    await house_numbering.start_house_numbering_worker()
     print(f"[{settings.APP_NAME}] Started successfully. Version: 1.0.0")
     yield
+    await house_numbering.stop_house_numbering_worker()
     await engine.dispose()
 
 
@@ -99,3 +102,4 @@ app.include_router(media.router)
 app.include_router(tracking.router)
 app.include_router(ogcapi.router_open)
 app.include_router(ogcapi.router_secure)
+app.include_router(house_numbering.router)
