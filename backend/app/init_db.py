@@ -41,6 +41,126 @@ async def init_database():
         # Tables
         await conn.run_sync(Base.metadata.create_all)
 
+        # House Numbering tables are additive and share the existing Field Collection vectors.
+        house_numbering_sqls = [
+
+            """
+            CREATE TABLE IF NOT EXISTS numbering_policies (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                version INTEGER NOT NULL DEFAULT 1,
+                policy JSONB NOT NULL,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS numbering_runs (
+                id SERIAL PRIMARY KEY,
+                building_layer_id INTEGER NOT NULL REFERENCES vector_layers(id),
+                road_layer_id INTEGER NOT NULL REFERENCES vector_layers(id),
+                ward_feature_id INTEGER NULL REFERENCES vector_features(id),
+                policy_version INTEGER NOT NULL DEFAULT 1,
+                status VARCHAR(30) NOT NULL DEFAULT 'PREVIEW',
+                parameters JSONB NOT NULL DEFAULT '{}'::jsonb,
+                created_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                committed_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                committed_at TIMESTAMP NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS numbering_run_items (
+                id SERIAL PRIMARY KEY,
+                run_id INTEGER NOT NULL REFERENCES numbering_runs(id) ON DELETE CASCADE,
+                building_feature_id INTEGER NOT NULL REFERENCES vector_features(id) ON DELETE CASCADE,
+                road_feature_id INTEGER NOT NULL REFERENCES vector_features(id) ON DELETE CASCADE,
+                house_number INTEGER NOT NULL,
+                display_number VARCHAR(100) NOT NULL,
+                chainage_m DOUBLE PRECISION NOT NULL,
+                side VARCHAR(20) NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS building_road_assignments (
+                id SERIAL PRIMARY KEY,
+                building_feature_id INTEGER NOT NULL UNIQUE REFERENCES vector_features(id) ON DELETE CASCADE,
+                road_feature_id INTEGER NULL REFERENCES vector_features(id) ON DELETE SET NULL,
+                source_point geometry(Point,4326) NULL,
+                source_type VARCHAR(20) NOT NULL DEFAULT 'centroid',
+                distance_m DOUBLE PRECISION NULL,
+                confidence DOUBLE PRECISION NULL,
+                candidate_count INTEGER NOT NULL DEFAULT 1,
+                assignment_status VARCHAR(30) NOT NULL DEFAULT 'PROPOSED',
+                assigned_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                assigned_at TIMESTAMP NULL,
+                updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS house_numbers (
+                id SERIAL PRIMARY KEY,
+                building_feature_id INTEGER NOT NULL UNIQUE REFERENCES vector_features(id) ON DELETE CASCADE,
+                road_feature_id INTEGER NOT NULL REFERENCES vector_features(id) ON DELETE RESTRICT,
+                numbering_run_id INTEGER NULL REFERENCES numbering_runs(id) ON DELETE SET NULL,
+                house_number INTEGER NOT NULL,
+                display_number VARCHAR(100) NOT NULL,
+                road_name VARCHAR(500) NULL,
+                chainage_m DOUBLE PRECISION NOT NULL,
+                side VARCHAR(20) NOT NULL,
+                status VARCHAR(30) NOT NULL DEFAULT 'COMMITTED',
+                is_manual BOOLEAN NOT NULL DEFAULT FALSE,
+                created_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS import_jobs (
+                id SERIAL PRIMARY KEY,
+                job_type VARCHAR(50) NOT NULL,
+                status VARCHAR(30) NOT NULL,
+                filename VARCHAR(500) NOT NULL,
+                target_layer_id INTEGER NULL REFERENCES vector_layers(id) ON DELETE SET NULL,
+                committed_layer_id INTEGER NULL REFERENCES vector_layers(id) ON DELETE SET NULL,
+                entity_type VARCHAR(50) NOT NULL DEFAULT 'generic',
+                report JSONB NOT NULL DEFAULT '{}'::jsonb,
+                created_by INTEGER NULL REFERENCES users(id) ON DELETE SET NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+                completed_at TIMESTAMP NULL
+            );
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS import_staging_features (
+                id SERIAL PRIMARY KEY,
+                job_id INTEGER NOT NULL REFERENCES import_jobs(id) ON DELETE CASCADE,
+                source_id VARCHAR(255) NULL,
+                source_index INTEGER NOT NULL,
+                properties JSONB NOT NULL DEFAULT '{}'::jsonb,
+                geom geometry(Geometry,4326) NOT NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT NOW()
+            );
+            """,
+            "CREATE INDEX IF NOT EXISTS idx_nrun_building ON numbering_runs(building_layer_id);",
+            "CREATE INDEX IF NOT EXISTS idx_nrun_road ON numbering_runs(road_layer_id);",
+            "CREATE INDEX IF NOT EXISTS idx_nrun_items_run ON numbering_run_items(run_id);",
+            "CREATE INDEX IF NOT EXISTS idx_bra_road ON building_road_assignments(road_feature_id);",
+            "CREATE INDEX IF NOT EXISTS idx_bra_status ON building_road_assignments(assignment_status);",
+            "CREATE INDEX IF NOT EXISTS idx_bra_geom ON building_road_assignments USING gist(source_point);",
+            "CREATE INDEX IF NOT EXISTS idx_house_number_road ON house_numbers(road_feature_id);",
+            "CREATE INDEX IF NOT EXISTS idx_house_number_number ON house_numbers(house_number);",
+            "CREATE INDEX IF NOT EXISTS idx_import_job_status ON import_jobs(status);",
+            "CREATE INDEX IF NOT EXISTS idx_import_stage_geom ON import_staging_features USING gist(geom);",
+
+        ]
+        for sql in house_numbering_sqls:
+            try:
+                await conn.execute(text(sql))
+            except Exception:
+                pass
+
         # Safe schema synchronization for existing databases
         sync_sqls = [
             "ALTER TABLE vector_layers ADD COLUMN IF NOT EXISTS allow_snapping BOOLEAN DEFAULT TRUE NOT NULL;",
@@ -112,6 +232,8 @@ async def init_database():
 
     # Seed superuser
     await seed_superuser()
+
+    await seed_house_numbering_policy()
 
     # Backfill MBTiles center metadata for existing packages
     await backfill_mbtiles_centers()
@@ -213,3 +335,37 @@ async def backfill_mbtiles_centers():
             await db.rollback()
             print(f"[INIT] MBTiles center backfill handled: {e}")
 
+
+
+async def seed_house_numbering_policy():
+    """Seed an explicit prototype policy once; municipal rules remain data-driven."""
+    policy = {
+        "orientation_method": "canonical_endpoint",
+        "numbering_origin": 1,
+        "spacing_m": 10.0,
+        "rounding_method": "round",
+        "odd_even_convention": "left_odd_right_even",
+        "branch_format": "{road}/{number}",
+        "duplicate_policy": "increment_suffix",
+        "associated_building_policy": "same_road_nearest",
+        "separate_building_policy": "independent",
+        "suffix_policy": "alpha",
+        "preserve_manual_numbers": True,
+        "status_label": "Prototype / Pending Municipal Confirmation",
+    }
+    async with AsyncSessionLocal() as db:
+        try:
+            await db.execute(text("""
+                INSERT INTO numbering_policies (
+                    name, version, policy, is_active, created_by
+                )
+                SELECT
+                    'Prototype KMC House Numbering', 1, :policy::jsonb, TRUE, NULL
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM numbering_policies
+                    WHERE name='Prototype KMC House Numbering'
+                );
+            """), {"policy": json.dumps(policy)})
+            await db.commit()
+        except Exception:
+            await db.rollback()
