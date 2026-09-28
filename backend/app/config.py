@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # ---- Database ----
     POSTGRES_DB: str = "kmc_gis"
     POSTGRES_USER: str = "kmc_user"
-    POSTGRES_PASSWORD: str = "KmcP0stGr3s!Secure2024"
+    POSTGRES_PASSWORD: str
     POSTGRES_HOST: str = "postgres"
     POSTGRES_PORT: int = 5432
 
@@ -34,10 +34,10 @@ class Settings(BaseSettings):
         )
 
     # ---- Redis ----
-    REDIS_URL: str = "redis://redis:6379/0"
+    REDIS_URL: str
 
     # ---- JWT / Auth ----
-    SECRET_KEY: str = "kmc-gis-server-jwt-secret-change-in-production"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     # ---- Default Admin ----
     ADMIN_USERNAME: str = "KmcSuperUser2083"
     ADMIN_EMAIL: str = "admin@kmc.gov.np"
-    ADMIN_PASSWORD: str = "KmcAdmin@2024!"
+    ADMIN_PASSWORD: str
     ADMIN_FULL_NAME: str = "KMC GIS Administrator"
 
     # ---- TileServer ----
@@ -70,7 +70,10 @@ class Settings(BaseSettings):
     # ---- Application ----
     APP_NAME: str = "KMC-GIS-SERVER"
     DEBUG: bool = False
-    PUBLIC_SERVER_URL: Optional[str] = "https://103.69.126.226"
+    PUBLIC_SERVER_URL: Optional[str] = None
+
+    # ---- House Numbering ----
+    HOUSE_NUMBERING_METRIC_SRID: int = 32645
 
     # ---- Geofence ----
     GEOFENCE_RADIUS_METERS: float = 50.0
